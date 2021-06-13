@@ -86,26 +86,38 @@ async function main() {
 			const cd = cooldowns.get(arg);
 			const lv = levels.get(arg) ?? 0;
 			cooldowns.delete(arg);
-			void message.reply({ content: COOLDOWN_RESET(ms((cd ?? Date.now()) - Date.now()), lv) });
+			void message.reply({
+				content: COOLDOWN_RESET(ms((cd ?? Date.now()) - Date.now()), lv),
+				allowedMentions: { repliedUser: false },
+			});
 		}
 
 		if (cmd === QUIZ_RESET_LV_CMD(client.user?.username ?? '')) {
 			const cd = cooldowns.get(arg);
 			const lv = levels.get(arg) ?? 0;
 			levels.delete(arg);
-			void message.reply({ content: LEVEL_RESET(ms((cd ?? Date.now()) - Date.now()), lv) });
+			void message.reply({
+				content: LEVEL_RESET(ms((cd ?? Date.now()) - Date.now()), lv),
+				allowedMentions: { repliedUser: false },
+			});
 		}
 
 		if (cmd === QUIZ_CHECK_CMD(client.user?.username ?? '')) {
 			const cd = cooldowns.get(arg);
 			const lv = levels.get(arg) ?? 0;
 			const nextCd = ms(backoffInMs(lv), true);
-			void message.reply({ content: CHECK(ms((cd ?? Date.now()) - Date.now()), lv, nextCd) });
+			void message.reply({
+				content: CHECK(ms((cd ?? Date.now()) - Date.now()), lv, nextCd),
+				allowedMentions: { repliedUser: false },
+			});
 		}
 
 		if (cmd === DEBUG_BACKOFF_CMD(client.user?.username ?? '')) {
 			const cds = [...Array(MAX_LVL).keys()].map((v) => `Lv: ${v} | Backoff: ${ms(backoffInMs(v))}`);
-			void message.reply({ content: `${cb}js\n${backoffInMs.toString()}\n\n${cds.join('\n')}${cb}` });
+			void message.reply({
+				content: `${cb}js\n${backoffInMs.toString()}\n\n${cds.join('\n')}${cb}`,
+				allowedMentions: { repliedUser: false },
+			});
 		}
 	});
 
