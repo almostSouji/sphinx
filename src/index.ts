@@ -1,11 +1,11 @@
 import { config } from 'dotenv';
+import ms from '@naval-base/ms';
 import { resolve, join } from 'path';
 import {
 	Client,
 	Collection,
 	Intents,
 	MessageActionRow,
-	Snowflake,
 	MessageSelectMenu,
 	Permissions,
 	Constants,
@@ -18,22 +18,39 @@ import {
 	BUTTON_EMOJI_START_QUESTIONS,
 	BUTTON_LABEL_START_QUESTIONS,
 	BUTTON_MESSAGE_TEXT,
+	COOLDOWN_RESET,
 	ERROR_MADE,
+	ON_TIMEOUT,
 	PROGRESS_DONE,
 	PROGRESS_TO_DO,
-	setupQuizCommand,
+	QUIZ_RESET_CD_CMD,
+	QUIZ_RESET_LV_CMD,
+	QUIZ_SETUP_CMD,
 	SUCCESS,
+	LEVEL_RESET,
+	DEBUG_BACKOFF_CMD,
+	QUIZ_CHECK_CMD,
+	CHECK,
+	MAX_LVL,
 } from './constants';
 
 config({ path: resolve(__dirname, '../.env') });
 
 export const questions = new Collection<string, Question>();
-export const cooldowns = new Collection<string, Snowflake>();
+export const cooldowns = new Collection<string, number>();
+export const levels = new Collection<string, number>();
 const cb = '```' as const;
 
 function progress(reached: number, total: number) {
 	return `Progress: ${PROGRESS_DONE.repeat(reached)}${PROGRESS_TO_DO.repeat(total - reached)}`;
 }
+
+function backoffInMs(level: number): number {
+	return (2 ** level / 4) * 60 * 60 * 1_000;
+}
+
+setInterval(() => cooldowns.each((c, k) => Date.now() > c && cooldowns.delete(k)), 60_000);
+setInterval(() => levels.each((c, k) => c > MAX_LVL && levels.delete(k)), 60_000);
 
 async function main() {
 	const client = new Client({ intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS] });
@@ -44,7 +61,7 @@ async function main() {
 
 	client.on('message', (message) => {
 		if (message.author.bot || !message.member?.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) return;
-		if (message.content === setupQuizCommand(client.user?.username ?? '')) {
+		if (message.content === QUIZ_SETUP_CMD(client.user?.username ?? '')) {
 			void message.channel.send({
 				content: BUTTON_MESSAGE_TEXT,
 				components: [
@@ -57,6 +74,32 @@ async function main() {
 					),
 				],
 			});
+		}
+		const [cmd, arg] = message.content.split(/\s+/);
+		if (cmd === QUIZ_RESET_CD_CMD(client.user?.username ?? '')) {
+			const cd = cooldowns.get(arg);
+			const lv = levels.get(arg) ?? 0;
+			cooldowns.delete(arg);
+			void message.reply({ content: COOLDOWN_RESET(ms((cd ?? Date.now()) - Date.now()), lv) });
+		}
+
+		if (cmd === QUIZ_RESET_LV_CMD(client.user?.username ?? '')) {
+			const cd = cooldowns.get(arg);
+			const lv = levels.get(arg) ?? 0;
+			levels.delete(arg);
+			void message.reply({ content: LEVEL_RESET(ms((cd ?? Date.now()) - Date.now()), lv) });
+		}
+
+		if (cmd === QUIZ_CHECK_CMD(client.user?.username ?? '')) {
+			const cd = cooldowns.get(arg);
+			const lv = levels.get(arg) ?? 0;
+			const nextCd = ms(backoffInMs(lv), true);
+			void message.reply({ content: CHECK(ms((cd ?? Date.now()) - Date.now()), lv, nextCd) });
+		}
+
+		if (cmd === DEBUG_BACKOFF_CMD(client.user?.username ?? '')) {
+			const cds = [...Array(MAX_LVL).keys()].map((v) => `Lv: ${v} | Backoff: ${ms(backoffInMs(v))}`);
+			void message.reply({ content: `${cb}js\n${backoffInMs.toString()}\n\n${cds.join('\n')}${cb}` });
 		}
 	});
 
@@ -92,6 +135,16 @@ async function main() {
 			if (op === 'init') {
 				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 				if (!random) return;
+				const back = cooldowns.get(i.member?.user.id ?? '1');
+				const now = Date.now();
+
+				if (back && now < back) {
+					void i.reply({
+						content: ON_TIMEOUT(ms(back - now, true)),
+						ephemeral: true,
+					});
+					return;
+				}
 				already.push(random.id);
 				const parts = [progress(0, questions.size)];
 				if (random.description.length) parts.push(random.description);
@@ -103,6 +156,10 @@ async function main() {
 						description: c.description,
 					})),
 				);
+
+				const level = levels.get(i.user.id) ?? 0;
+				cooldowns.set(i.user.id, now + backoffInMs(level));
+				levels.set(i.user.id, level + 1);
 
 				void i.reply({
 					content: parts.join('\n'),
