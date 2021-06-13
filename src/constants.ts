@@ -8,11 +8,15 @@ export const COOLDOWN_RESET = (cd: string, lvl: number) => `Cooldown reset: \`${
 export const LEVEL_RESET = (cd: string, lvl: number) => `Level reset: \`${lvl}\` | Coodlown: \`${cd}\``;
 export const CHECK = (cd: string, lvl: number, next: string) =>
 	`Cooldown: \`${cd}\` | Level: \`${lvl}\` | Next cooldown: \`${next}\``;
+export const ALREADY = '`❌` You already passed the quiz!' as const;
+export const MISSING_ROLE = '`❌` The configured role is not available!' as const;
+export const MISSING_PERMISSIONS = '`❌` Can not assign the configured role!' as const;
+export const OTHER_ERROR = '`❌` Something went wrong!' as const;
 export const BUTTON_MESSAGE_TEXT = 'Pass the quiz to gain access!' as const;
 export const ERROR_MADE = "That wasn't right..." as const;
 export const SUCCESS = 'All correct!' as const;
 export const PROGRESS_DONE = '●' as const;
 export const PROGRESS_TO_DO = '○' as const;
-export const BUTTON_EMOJI_START_QUESTIONS = '❔' as const;
+export const BUTTON_EMOJI_START_QUESTIONS = '853450598300123176' as const;
 export const BUTTON_LABEL_START_QUESTIONS = 'Start' as const;
 export const MAX_LVL = 10 as const;

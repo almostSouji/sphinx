@@ -3,6 +3,7 @@ LABEL name "sphinx"
 LABEL version "0.0.0"
 LABEL maintainer "almostSouji <https://github.com/almostSouji>"
 ENV DISCORD_TOKEN=\
+	QUIZ_ROLE=\
 	FORCE_COLOR=1
 WORKDIR /usr/sphinx
 COPY package.json ./

@@ -10,6 +10,8 @@ import {
 	Permissions,
 	Constants,
 	MessageButton,
+	GuildMember,
+	Snowflake,
 } from 'discord.js';
 import { readdirSync } from 'fs';
 import { Question } from './structures/question';
@@ -32,6 +34,10 @@ import {
 	QUIZ_CHECK_CMD,
 	CHECK,
 	MAX_LVL,
+	ALREADY,
+	MISSING_ROLE,
+	MISSING_PERMISSIONS,
+	OTHER_ERROR,
 } from './constants';
 
 config({ path: resolve(__dirname, '../.env') });
@@ -127,7 +133,8 @@ async function main() {
 		questions.set(cmd.id, cmd);
 	}
 
-	client.on('interaction', (i) => {
+	client.on('interaction', async (i) => {
+		if (!(i.member instanceof GuildMember)) return;
 		if (i.isMessageComponent()) {
 			const [op, , a] = i.customID.split('-');
 			const already = a.split('/').filter((e) => e.length);
@@ -135,8 +142,16 @@ async function main() {
 			if (op === 'init') {
 				// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 				if (!random) return;
-				const back = cooldowns.get(i.member?.user.id ?? '1');
+				const back = cooldowns.get(i.member.user.id);
 				const now = Date.now();
+
+				if (i.member instanceof GuildMember && i.member.roles.cache.has((process.env.QUIZ_ROLE ?? '1') as Snowflake)) {
+					void i.reply({
+						content: ALREADY,
+						ephemeral: true,
+					});
+					return;
+				}
 
 				if (back && now < back) {
 					void i.reply({
@@ -145,6 +160,7 @@ async function main() {
 					});
 					return;
 				}
+
 				already.push(random.id);
 				const parts = [progress(0, questions.size)];
 				if (random.description.length) parts.push(random.description);
@@ -186,6 +202,33 @@ async function main() {
 
 		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (!random) {
+			const role = i.guild?.roles.cache.get((process.env.QUIZ_ROLE ?? '1') as Snowflake);
+			if (!role) {
+				void i.update({
+					content: `${progress(questions.size, questions.size)}\n${SUCCESS}\n${MISSING_ROLE}`,
+					components: [],
+				});
+				return;
+			}
+			if (!role.editable) {
+				void i.update({
+					content: `${progress(questions.size, questions.size)}\n${SUCCESS}\n${MISSING_PERMISSIONS}`,
+					components: [],
+				});
+				return;
+			}
+
+			try {
+				await i.member.roles.add(role);
+			} catch (error) {
+				logger.error(error);
+				void i.update({
+					content: `${progress(questions.size, questions.size)}\n${SUCCESS}\n${OTHER_ERROR}`,
+					components: [],
+				});
+				return;
+			}
+
 			void i.update({
 				content: `${progress(questions.size, questions.size)}\n${SUCCESS}`,
 				components: [],
