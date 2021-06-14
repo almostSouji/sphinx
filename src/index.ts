@@ -191,7 +191,11 @@ function main() {
 				const back = cooldowns.get(i.member.user.id);
 				const now = Date.now();
 
-				if (i.member instanceof GuildMember && i.member.roles.cache.has((process.env.QUIZ_ROLE ?? '1') as Snowflake)) {
+				if (
+					process.env.QUIZ_ROLE &&
+					i.member instanceof GuildMember &&
+					i.member.roles.cache.has(process.env.QUIZ_ROLE as Snowflake)
+				) {
 					void i.reply({
 						content: ALREADY,
 						ephemeral: true,
@@ -245,31 +249,33 @@ function main() {
 
 		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		if (!random) {
-			const role = i.guild?.roles.cache.get((process.env.QUIZ_ROLE ?? '1') as Snowflake);
-			if (!role) {
-				void i.update({
-					content: `${progress(questions.size, questions.size)}\n${SUCCESS}\n${MISSING_ROLE}`,
-					components: [],
-				});
-				return;
-			}
-			if (!role.editable) {
-				void i.update({
-					content: `${progress(questions.size, questions.size)}\n${SUCCESS}\n${MISSING_PERMISSIONS}`,
-					components: [],
-				});
-				return;
-			}
+			if (process.env.QUIZ_ROLE) {
+				const role = i.guild?.roles.cache.get(process.env.QUIZ_ROLE as Snowflake);
+				if (!role) {
+					void i.update({
+						content: `${progress(questions.size, questions.size)}\n${SUCCESS}\n${MISSING_ROLE}`,
+						components: [],
+					});
+					return;
+				}
+				if (!role.editable) {
+					void i.update({
+						content: `${progress(questions.size, questions.size)}\n${SUCCESS}\n${MISSING_PERMISSIONS}`,
+						components: [],
+					});
+					return;
+				}
 
-			try {
-				await i.member.roles.add(role);
-			} catch (error) {
-				logger.error(error);
-				void i.update({
-					content: `${progress(questions.size, questions.size)}\n${SUCCESS}\n${OTHER_ERROR}`,
-					components: [],
-				});
-				return;
+				try {
+					await i.member.roles.add(role);
+				} catch (error) {
+					logger.error(error);
+					void i.update({
+						content: `${progress(questions.size, questions.size)}\n${SUCCESS}\n${OTHER_ERROR}`,
+						components: [],
+					});
+					return;
+				}
 			}
 
 			void i.update({
