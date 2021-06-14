@@ -176,7 +176,7 @@ async function main() {
 				already.push(random.id);
 				const parts = [progress(0, questions.size)];
 				if (random.description.length) parts.push(random.description);
-				if (random.code.length) parts.push(`${cb}js\n${random.code}\n${cb}`);
+				if (random.code?.length) parts.push(`${cb}js\n${random.code}\n${cb}`);
 				const component = new MessageSelectMenu().setCustomID(`answer-${random.id}-${already.join('/')}`).addOptions(
 					random.choices.map((c) => ({
 						label: c.value,
@@ -251,7 +251,7 @@ async function main() {
 		already.push(random.id);
 		const parts = [progress(already.length - 1, questions.size)];
 		if (random.description.length) parts.push(random.description);
-		if (random.code.length) parts.push(`${cb}js\n${random.code}\n${cb}`);
+		if (random.code?.length) parts.push(`${cb}js\n${random.code}\n${cb}`);
 		const component = new MessageSelectMenu().setCustomID(`answer-${random.id}-${already.join('/')}`).addOptions(
 			random.choices.map((c) => ({
 				label: c.value,
