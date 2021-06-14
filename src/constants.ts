@@ -1,4 +1,4 @@
-export const QUIZ_SETUP_CMD = (username: string) => `${username}.setup.quiz`;
+export const QUIZ_SETUP_CMD = (username: string) => `${username}.setup`;
 export const QUIZ_RESET_CD_CMD = (username: string) => `${username}.reset.cooldown`;
 export const QUIZ_RESET_LV_CMD = (username: string) => `${username}.reset.level`;
 export const QUIZ_CHECK_CMD = (username: string) => `${username}.check`;

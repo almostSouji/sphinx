@@ -4,9 +4,9 @@ A simple quiz bot template. Participants have to answer all questions correctly 
 
 ## Commands
 
-commands ares structued like `sphinx.scope.option [...arg]`. Replace `"sphinx"` with the username of the Discord bot account used. All commands require the user to have the `ADMINISTRATOR` permission, as all commands in place are used to reset and debug values.
+commands are structured like `sphinx.scope.option [...arg]`. Replace `"sphinx"` with the username of the Discord bot account used. All commands require the user to have the `ADMINISTRATOR` permission, as all implemented commands reset and debug values.
 
-- `sphinx.setup.quiz` Post the quiz message (can be in a locked channel)
+- `sphinx.setup` Post the quiz message (can be in a locked channel)
 - `sphinx.reset.cooldown <userid>` Reset the cooldown for the supplied user
 - `sphinx.reset.level <userid>` Reset the level for the supplied user
 - `sphinx.check <userid>` Display the user's current colldown, level and next backoff time
@@ -15,7 +15,7 @@ commands ares structued like `sphinx.scope.option [...arg]`. Replace `"sphinx"` 
 
 ## Role Gate
 
-If supplied with the key `.env` key `QUIZ_ROLE` the bot will add the specified role to people successfully taking the quiz and check for it to already be present before allowing the quiz to start. This is completely optional, and the role can be omitted to use the application for fun quizzes
+If supplied with the key `.env` key `QUIZ_ROLE` the application will add the specified role to users successfully taking the quiz and check for it to already be present before allowing the quiz to start. This feature is optional (remove the key from `.env` to disable).
 
 ## Questions
 
@@ -54,7 +54,7 @@ Note that the `id` key value needs to be unique between all questions, else a la
 
 ## Customize
 
-The file `constants.ts` holds the configurable user facing messages, responses, constants, symbols and emojis used in the application. 
+The file `constants.ts` holds the configurable user-facing messages, responses, constants, symbols, and emojis used in the application. 
 
 ## Backoff
 
@@ -81,17 +81,19 @@ Lv: 8 | Backoff: 3d
 Lv: 9 | Backoff: 5d
 ```
 
-Meaning after the first attempt a user will have to wait for 15 minutes, after the second, 30 minutes and so on. To customize backoff times you can change this function (note that the return value, as suggested by the function name, should be wait time in milliseconds). A level is gained as soon as the quiz starts to prevent aborting without consequence.
+After the first attempt, a user will have to wait for 15 minutes,  30 minutes after the second, etc. (note that the return value, as suggested by the function name, should be wait time in milliseconds). Users gain a level as soon as the quiz starts to prevent aborting without consequence.
+
+Should a user reach `MAX_LVL` their level is reset (by default 9). 
 
 ## Setup
 
-Sphinx can be run as standard node process with 
+Sphinx can run as a standard node process with 
 
 ```
 npm run build
 npm run start
 ```
 
-Alternatively you can set up as a [docker 🐋](https://www.docker.com/) container with `docker-compose up`.
+Alternatively, you can set up a [docker 🐋](https://www.docker.com/) container with `docker-compose up`.
 
 Note that in either case restarting the application will reset the level and cooldown of every involved user and reload all questions.
