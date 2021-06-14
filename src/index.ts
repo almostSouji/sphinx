@@ -40,6 +40,7 @@ import {
 	OTHER_ERROR,
 	QUIZ_RELOAD_QUESTIONS,
 	RELOADED,
+	PROGRESS_PREFIX,
 } from './constants';
 
 export interface Choice {
@@ -64,7 +65,7 @@ export const levels = new Collection<string, number>();
 const cb = '```' as const;
 
 function progress(reached: number, total: number) {
-	return `Progress: ${PROGRESS_DONE.repeat(reached)}${PROGRESS_TO_DO.repeat(total - reached)}`;
+	return `${PROGRESS_PREFIX}${PROGRESS_DONE.repeat(reached)}${PROGRESS_TO_DO.repeat(total - reached)}`;
 }
 
 function backoffInMs(level: number): number {
