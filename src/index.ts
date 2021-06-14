@@ -51,8 +51,9 @@ export interface Question {
 	id: string;
 	correct: string;
 	choices: Choice[];
-	description: string;
+	description?: string;
 	code?: string;
+	codelanguage?: string;
 }
 
 config({ path: resolve(__dirname, '../.env') });
@@ -68,6 +69,16 @@ function progress(reached: number, total: number) {
 
 function backoffInMs(level: number): number {
 	return (2 ** level / 4) * 60 * 60 * 1_000;
+}
+
+function formatQuestion(q: Question, already: number, max: number): string {
+	const { code, codelanguage, description } = q;
+	const parts = [progress(already, max)];
+	if (description?.length) parts.push(description);
+	if (code?.length) {
+		parts.push(`${cb}${codelanguage ?? ''}\n${code}\n${cb}`);
+	}
+	return parts.join('\n');
 }
 
 setInterval(() => cooldowns.each((c, k) => Date.now() > c && cooldowns.delete(k)), 60_000);
@@ -197,9 +208,6 @@ function main() {
 				}
 
 				already.push(random.id);
-				const parts = [progress(0, questions.size)];
-				if (random.description.length) parts.push(random.description);
-				if (random.code?.length) parts.push(`${cb}js\n${random.code}\n${cb}`);
 				const component = new MessageSelectMenu().setCustomID(`answer-${random.id}-${already.join('/')}`).addOptions(
 					random.choices.map((c) => ({
 						label: c.value,
@@ -213,7 +221,7 @@ function main() {
 				levels.set(i.user.id, level + 1);
 
 				void i.reply({
-					content: parts.join('\n'),
+					content: formatQuestion(random, 0, questions.size),
 					ephemeral: true,
 					components: [new MessageActionRow().addComponents(component)],
 				});
@@ -272,9 +280,6 @@ function main() {
 		}
 
 		already.push(random.id);
-		const parts = [progress(already.length - 1, questions.size)];
-		if (random.description.length) parts.push(random.description);
-		if (random.code?.length) parts.push(`${cb}js\n${random.code}\n${cb}`);
 		const component = new MessageSelectMenu().setCustomID(`answer-${random.id}-${already.join('/')}`).addOptions(
 			random.choices.map((c) => ({
 				label: c.value,
@@ -283,7 +288,7 @@ function main() {
 			})),
 		);
 		void i.update({
-			content: parts.join('\n'),
+			content: formatQuestion(random, already.length - 1, questions.size),
 			components: [new MessageActionRow().addComponents(component)],
 		});
 	});
