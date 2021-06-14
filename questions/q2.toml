@@ -1,14 +1,15 @@
 id = "2"
-correct = "A"
+correct = "B"
+
+choices = [
+	{ value= "A", description = "Option A"},
+	{ value = "B", description = "Option B (this is correct)"},
+	{ value = "C", description = "Option C"}
+]
 
 description = """
 Pick
-A
-(example without code)\
+A\
 """
 
-choices = [
-	{ value= "A", description = "Option A (this is correct)"},
-	{ value = "B", description = "Option B"},
-	{ value = "C", description = "Option C"}
-]
+codelanguage = "js"

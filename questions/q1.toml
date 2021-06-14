@@ -1,19 +1,26 @@
+# unique ID
 id = "1"
+# correct choice value (question answer)
 correct = "A"
 
-description = """
-Pick
-A\
-"""
-
-code = """
-function hello() {
-	console.log("Hello World")
-}
-"""
-
+# dropdown choices
 choices = [
 	{ value= "A", description = "Option A (this is correct)"},
 	{ value = "B", description = "Option B"},
 	{ value = "C", description = "Option C"}
 ]
+
+# (optional) description to display above the codeblock
+description = """
+Pick
+A\
+"""
+
+# (optional) code to display in a codeblock
+code = """
+function hello() {
+	console.log("Hello World")
+}
+"""
+# (optional) language to use for the codeblock highlight
+codelanguage = "js"
