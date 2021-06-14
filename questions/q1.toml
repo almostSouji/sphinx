@@ -1,0 +1,19 @@
+id = "1"
+correct = "A"
+
+description = """
+Pick
+A\
+"""
+
+code = """
+function hello() {
+	console.log("Hello World")
+}
+"""
+
+choices = [
+	{ value= "A", description = "Option A (this is correct)"},
+	{ value = "B", description = "Option B"},
+	{ value = "C", description = "Option C"}
+]

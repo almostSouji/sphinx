@@ -2,12 +2,14 @@ export const QUIZ_SETUP_CMD = (username: string) => `${username}.setup.quiz`;
 export const QUIZ_RESET_CD_CMD = (username: string) => `${username}.reset.cooldown`;
 export const QUIZ_RESET_LV_CMD = (username: string) => `${username}.reset.level`;
 export const QUIZ_CHECK_CMD = (username: string) => `${username}.check`;
+export const QUIZ_RELOAD_QUESTIONS = (username: string) => `${username}.reload`;
 export const DEBUG_BACKOFF_CMD = (username: string) => `${username}.debug.backoff`;
 export const ON_TIMEOUT = (time: string) => `You are on cooldown. Try again in ${time}!`;
 export const COOLDOWN_RESET = (cd: string, lvl: number) => `Cooldown reset: \`${cd}\` | lv: \`${lvl}\``;
 export const LEVEL_RESET = (cd: string, lvl: number) => `Level reset: \`${lvl}\` | Coodlown: \`${cd}\``;
 export const CHECK = (cd: string, lvl: number, next: string) =>
 	`Cooldown: \`${cd}\` | Level: \`${lvl}\` | Next cooldown: \`${next}\``;
+export const RELOADED = (questions: number) => `Questions have been reloaded! There are now \`${questions}\` to pass.`;
 export const ALREADY = '`❌` You already passed the quiz!' as const;
 export const MISSING_ROLE = '`❌` The configured role is not available!' as const;
 export const MISSING_PERMISSIONS = '`❌` Can not assign the configured role!' as const;

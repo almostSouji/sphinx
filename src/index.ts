@@ -1,5 +1,6 @@
 import { config } from 'dotenv';
 import ms from '@naval-base/ms';
+import * as TOML from '@ltd/j-toml';
 import { resolve, join } from 'path';
 import {
 	Client,
@@ -13,8 +14,7 @@ import {
 	GuildMember,
 	Snowflake,
 } from 'discord.js';
-import { readdirSync } from 'fs';
-import { Question } from './structures/question';
+import { readdirSync, readFileSync } from 'fs';
 import { logger } from './util/logger';
 import {
 	BUTTON_EMOJI_START_QUESTIONS,
@@ -38,7 +38,22 @@ import {
 	MISSING_ROLE,
 	MISSING_PERMISSIONS,
 	OTHER_ERROR,
+	QUIZ_RELOAD_QUESTIONS,
+	RELOADED,
 } from './constants';
+
+export interface Choice {
+	value: string;
+	description: string;
+}
+
+export interface Question {
+	id: string;
+	correct: string;
+	choices: Choice[];
+	description: string;
+	code?: string;
+}
 
 config({ path: resolve(__dirname, '../.env') });
 
@@ -58,7 +73,17 @@ function backoffInMs(level: number): number {
 setInterval(() => cooldowns.each((c, k) => Date.now() > c && cooldowns.delete(k)), 60_000);
 setInterval(() => levels.each((c, k) => c > MAX_LVL && levels.delete(k)), 60_000);
 
-async function main() {
+function loadQuestions(folder: string): void {
+	for (const entry of readdirSync(join(__dirname, '..', folder))) {
+		if (!entry.endsWith('toml')) continue;
+		const file = readFileSync(join(__dirname, '..', folder, entry), { encoding: 'utf8' });
+		const data = TOML.parse(file, 1.0, '\n') as unknown as Question;
+		questions.set(data.id, data);
+	}
+}
+
+function main() {
+	loadQuestions('questions');
 	const client = new Client({ intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS] });
 
 	client.on('ready', () => {
@@ -119,6 +144,15 @@ async function main() {
 				allowedMentions: { repliedUser: false },
 			});
 		}
+
+		if (cmd === QUIZ_RELOAD_QUESTIONS(client.user?.username ?? '')) {
+			questions.clear();
+			loadQuestions('questions');
+			void message.reply({
+				content: RELOADED(questions.size),
+				allowedMentions: { repliedUser: false },
+			});
+		}
 	});
 
 	process.on('unhandledRejection', (source) => {
@@ -133,17 +167,6 @@ async function main() {
 	});
 
 	void client.login(process.env.TOKEN);
-
-	const dir = readdirSync(join(__dirname, 'questions')).filter((file) =>
-		['.js'].some((ending: string) => file.endsWith(ending)),
-	);
-
-	for (const file of dir) {
-		const mod = await import(join(__dirname, 'questions', file));
-		const qClass = Object.values(mod).find((d: any) => d.prototype instanceof Question) as any;
-		const cmd = new qClass();
-		questions.set(cmd.id, cmd);
-	}
 
 	client.on('interaction', async (i) => {
 		if (!(i.member instanceof GuildMember)) return;
