@@ -150,7 +150,7 @@ function main() {
 		}
 
 		if (cmd === DEBUG_BACKOFF_CMD(client.user?.username ?? '')) {
-			const cds = [...Array(MAX_LVL).keys()].map((v) => `Lv: ${v} | Backoff: ${ms(backoffInMs(v))}`);
+			const cds = [...Array(MAX_LVL + 1).keys()].map((v) => `Lv: ${v} | Backoff: ${ms(backoffInMs(v))}`);
 			void message.reply({
 				content: `${cb}js\n${backoffInMs.toString()}\n\n${cds.join('\n')}${cb}`,
 				allowedMentions: { repliedUser: false },

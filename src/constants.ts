@@ -21,5 +21,5 @@ export const PROGRESS_DONE = '●' as const;
 export const PROGRESS_TO_DO = '○' as const;
 export const BUTTON_EMOJI_START_QUESTIONS = '853450598300123176' as const;
 export const BUTTON_LABEL_START_QUESTIONS = 'Start' as const;
-export const MAX_LVL = 10 as const;
+export const MAX_LVL = 9 as const;
 export const PROGRESS_PREFIX = 'Progress: ' as const;
