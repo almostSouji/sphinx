@@ -29,9 +29,9 @@ correct = "A"
 
 # dropdown choices
 choices = [
-	{ value= "A", description = "Option A (this is correct)"},
-	{ value = "B", description = "Option B"},
-	{ value = "C", description = "Option C"}
+	{ value = "A", description = "Option A (this is correct)" },
+	{ value = "B", description = "Option B" },
+	{ value = "C", description = "Option C" }
 ]
 
 # (optional) description to display above the codeblock
